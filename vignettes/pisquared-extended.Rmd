@@ -1,16 +1,25 @@
 ---
-title: "pi-squared-example"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{pi-squared-example}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "pisquared-extended"
+author: David A Knowles
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
+    fig_width: 6
 ---
 
-```{r setup, include = FALSE}
+```{r global_options, include=FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE
+  fig.width=5, 
+  fig.height=6,
+  fig.path='figs/',
+  echo=TRUE, 
+  warning=FALSE, 
+  message=FALSE
 )
+```
+
+```{r setup}
 library(pisquared)
 require(tidyverse)
 require(magrittr)
@@ -66,30 +75,6 @@ marg_results %>%
   ggplot(aes(true_pi1, alpha)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_alpha) + xlab("True pi1") + ylab("Estimated alpha")
 marg_results %>% 
   ggplot(aes(true_pi1, beta)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_beta) + xlab("True pi1") + ylab("Estimated beta")
-```
-
-
-```{r test-marginal-mix}
-true_alpha = 0.2
-true_beta = 2
-N = 1000
-marg_results = foreach(true_pi1 = c(0.001,0.01,0.05,seq(.1,1,by=0.1)), .combine = bind_rows) %:%
-  foreach(rep = 1:30, .combine = bind_rows) %dopar% {
-    p = simulate_pvalues(N = N, pi1 = true_pi1, alpha = true_alpha, beta = true_beta)
-    mm = model_based_pi0_mix(p)
-        tibble(true_pi1 = true_pi1, 
-               pi1 = 1 - mm$par$pi0, 
-               rep = rep, 
-               qvalue_pi1 = 1 - my_pi0est(p)$pi0)
-}
-marg_results
-```
-
-```{r vary-true-pi0, fig.width=4.5, fig.height=4}
-res_gathered = marg_results %>% select(true_pi1, model_based = pi1, qvalue = qvalue_pi1) %>% 
-  gather(method, est_pi1, -true_pi1) 
-res_gathered %>% ggplot(aes(true_pi1, est_pi1, col = method, shape = method)) + geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 0.02)) + 
-  geom_abline(intercept = 0, slope = 1) + xlab("True pi1") + ylab("Estimated pi1") + theme(legend.position = c(0.25,.8))
 ```
 
 ## Estimating sharing
