@@ -56,8 +56,10 @@ Both Storey's qvalue and our model based approach give approximately unbiased es
 ```{r vary-true-pi0, fig.width=4.5, fig.height=4}
 res_gathered = marg_results %>% select(true_pi1, model_based = pi1, qvalue = qvalue_pi1) %>% 
   gather(method, est_pi1, -true_pi1) 
-res_gathered  %>% ggplot(aes(true_pi1, est_pi1, col = method, shape = method)) + geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 0.02)) + 
-  geom_abline(intercept = 0, slope = 1) + xlab("True pi1") + ylab("Estimated pi1") + theme(legend.position = c(0.25,.8))
+res_gathered  %>% ggplot(aes(true_pi1, est_pi1, col = method, shape = method)) + 
+  geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 0.02)) + 
+  geom_abline(intercept = 0, slope = 1) + xlab("True pi1") + ylab("Estimated pi1") + 
+  theme(legend.position = c(0.25,.8))
 ```
 
 Errors are substantially lower for pisquared than Storey's pi0, as expected since the data is generated from the pisquared model. Additionally Storey's pi0 can be negative which is clearly unreasonable. 
@@ -66,15 +68,18 @@ err_summary = res_gathered %>%
   group_by(method, true_pi1) %>% 
   summarize(RMSE = sqrt(mean((true_pi1 - est_pi1)^2))) %>% 
   ungroup()
-err_summary %>% ggplot(aes(true_pi1, RMSE, col = method, shape = method)) + geom_point(size = 2) + expand_limits(y = 0) + theme(legend.position = c(0.8,.8))
+err_summary %>% ggplot(aes(true_pi1, RMSE, col = method, shape = method)) + geom_point(size = 2) + 
+  expand_limits(y = 0) + theme(legend.position = c(0.8,.8))
 ```
 
 alpha and beta are estimated quite robustly: 
 ```{r alpha-beta-estimation, fig.width=5, fig.height=4}
 marg_results %>% 
-  ggplot(aes(true_pi1, alpha)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_alpha) + xlab("True pi1") + ylab("Estimated alpha")
+  ggplot(aes(true_pi1, alpha)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_alpha) + 
+  xlab("True pi1") + ylab("Estimated alpha")
 marg_results %>% 
-  ggplot(aes(true_pi1, beta)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_beta) + xlab("True pi1") + ylab("Estimated beta")
+  ggplot(aes(true_pi1, beta)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_beta) + 
+  xlab("True pi1") + ylab("Estimated beta")
 ```
 
 ## Estimating sharing
@@ -94,8 +99,8 @@ true_jaccard = true_pi1s[1] * true_pi1s[2] / (1 - (1 - true_pi1s[1]) * (1 - true
 true_jaccard
 ```
 
-pisquared can use three methods provided by stan: maximum likelihood estimation "optimizing", variational Bayes ("vb") and Markov chain Monte Carlo ("sampling"). The fastest fitting approach is to do maximum likelihood estimation via LBFGS. 
-```{r compare-methods, message=F, echo=F}
+pisquared can use three methods provided by stan: maximum likelihood estimation ("optimizing"), variational Bayes ("vb") and Markov chain Monte Carlo ("sampling"). The fastest fitting approach is to do maximum likelihood estimation via LBFGS. 
+```{r compare-methods, message=F}
 methods = c("optimizing", "vb", "sampling")
 results = foreach(method = methods, .combine = bind_rows) %do% {
   foreach(bin_pvalues = c(T,F), .combine = bind_rows) %dopar% { 
@@ -195,6 +200,8 @@ jacc_results
 
 Plot the results: we see pisquared provides unbiased and accurate sharing estimates. 
 ```{r true-v-est-jaccard, fig.width=5, fig.height=4}
-jacc_results %>% ggplot(aes(actual_jacc, est_jaccard)) + geom_point() + xlab("Actual sharing (Jaccard)") + ylab("Estimated sharing (Jaccard)") + geom_abline(intercept = 0, slope = 1)
+jacc_results %>% ggplot(aes(actual_jacc, est_jaccard)) + geom_point() + 
+  xlab("Actual sharing (Jaccard)") + ylab("Estimated sharing (Jaccard)") + 
+  geom_abline(intercept = 0, slope = 1)
 ```
 

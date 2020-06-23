@@ -49,16 +49,16 @@ marg_results
 ## # A tibble: 390 x 11
 ##      pi0 alpha beta_minus_one  beta alpha_sd beta_sd pi0_sd true_pi1      pi1   rep qvalue_pi1
 ##    <dbl> <dbl>          <dbl> <dbl>    <dbl>   <dbl>  <dbl>    <dbl>    <dbl> <int>      <dbl>
-##  1 1.00  0.500          1.00   2.00    0.258    2.24 0.500     0.001 7.87e-11     1     0.0503
-##  2 0.994 0.502          1.01   2.01    0.221    1.96 0.159     0.001 5.82e- 3     2    -0.106 
-##  3 0.984 0.603          1.07   2.07    0.218    1.86 0.131     0.001 1.58e- 2     3    -0.0303
-##  4 0.995 0.488          1.03   2.03    0.230    2.71 0.157     0.001 5.49e- 3     4    -0.244 
-##  5 0.993 0.576          0.992  1.99    0.293    1.83 0.342     0.001 6.81e- 3     5     0.101 
-##  6 0.990 0.408          0.995  1.99    0.191    2.00 0.0356    0.001 1.00e- 2     6    -0.0221
-##  7 0.973 0.488          1.02   2.02    0.161    1.85 0.0405    0.001 2.65e- 2     7    -0.0593
-##  8 0.955 0.845          0.919  1.92    0.230    1.15 0.196     0.001 4.51e- 2     8     0.101 
-##  9 1.00  0.500          1.00   2.00    0.262    1.97 0.500     0.001 1.50e-10     9    -0.289 
-## 10 0.994 0.303          0.984  1.98    0.159    2.18 0.0272    0.001 6.27e- 3    10     0.0833
+##  1 0.963 0.659          0.975  1.98    0.207    1.70 0.0888    0.001 3.67e- 2     1    0.0505 
+##  2 1.00  0.500          1.00   2.00    0.264    2.19 0.500     0.001 1.03e-10     2   -0.00131
+##  3 0.980 0.627          0.958  1.96    0.215    2.25 0.127     0.001 2.04e- 2     3    0.0647 
+##  4 1.00  0.500          1.00   2.00    0.265    2.38 0.500     0.001 1.85e-10     4   -0.00252
+##  5 0.990 0.421          1.00   2.00    0.205    1.84 0.0459    0.001 9.63e- 3     5   -0.0815 
+##  6 1.00  0.500          1.00   2.00    0.260    2.18 0.500     0.001 2.62e-10     6   -0.0804 
+##  7 1.00  0.500          1.00   2.00    0.267    2.16 0.500     0.001 1.77e-10     7   -0.0471 
+##  8 1.00  0.500          1.00   2.00    0.263    2.47 0.500     0.001 9.83e-11     8   -0.00610
+##  9 0.987 0.264          1.00   2.00    0.107    2.15 0.0152    0.001 1.28e- 2     9    0.00511
+## 10 0.978 0.712          1.04   2.04    0.241    1.80 0.197     0.001 2.20e- 2    10    0.0374 
 ## # … with 380 more rows
 ```
 
@@ -67,8 +67,10 @@ Both Storey's qvalue and our model based approach give approximately unbiased es
 ```r
 res_gathered = marg_results %>% select(true_pi1, model_based = pi1, qvalue = qvalue_pi1) %>% 
   gather(method, est_pi1, -true_pi1) 
-res_gathered  %>% ggplot(aes(true_pi1, est_pi1, col = method, shape = method)) + geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 0.02)) + 
-  geom_abline(intercept = 0, slope = 1) + xlab("True pi1") + ylab("Estimated pi1") + theme(legend.position = c(0.25,.8))
+res_gathered  %>% ggplot(aes(true_pi1, est_pi1, col = method, shape = method)) + 
+  geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 0.02)) + 
+  geom_abline(intercept = 0, slope = 1) + xlab("True pi1") + ylab("Estimated pi1") + 
+  theme(legend.position = c(0.25,.8))
 ```
 
 ![plot of chunk vary-true-pi0](figs/vary-true-pi0-1.png)
@@ -80,7 +82,8 @@ err_summary = res_gathered %>%
   group_by(method, true_pi1) %>% 
   summarize(RMSE = sqrt(mean((true_pi1 - est_pi1)^2))) %>% 
   ungroup()
-err_summary %>% ggplot(aes(true_pi1, RMSE, col = method, shape = method)) + geom_point(size = 2) + expand_limits(y = 0) + theme(legend.position = c(0.8,.8))
+err_summary %>% ggplot(aes(true_pi1, RMSE, col = method, shape = method)) + geom_point(size = 2) + 
+  expand_limits(y = 0) + theme(legend.position = c(0.8,.8))
 ```
 
 ![plot of chunk rmse-comparison](figs/rmse-comparison-1.png)
@@ -89,14 +92,16 @@ alpha and beta are estimated quite robustly:
 
 ```r
 marg_results %>% 
-  ggplot(aes(true_pi1, alpha)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_alpha) + xlab("True pi1") + ylab("Estimated alpha")
+  ggplot(aes(true_pi1, alpha)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_alpha) + 
+  xlab("True pi1") + ylab("Estimated alpha")
 ```
 
 ![plot of chunk alpha-beta-estimation](figs/alpha-beta-estimation-1.png)
 
 ```r
 marg_results %>% 
-  ggplot(aes(true_pi1, beta)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_beta) + xlab("True pi1") + ylab("Estimated beta")
+  ggplot(aes(true_pi1, beta)) + geom_point(alpha = 0.3, size = 3) + geom_hline(yintercept = true_beta) + 
+  xlab("True pi1") + ylab("Estimated beta")
 ```
 
 ![plot of chunk alpha-beta-estimation](figs/alpha-beta-estimation-2.png)
@@ -131,18 +136,41 @@ true_jaccard
 ## [1] 0.09090909
 ```
 
-pisquared can use three methods provided by stan: maximum likelihood estimation "optimizing", variational Bayes ("vb") and Markov chain Monte Carlo ("sampling"). The fastest fitting approach is to do maximum likelihood estimation via LBFGS. 
+pisquared can use three methods provided by stan: maximum likelihood estimation ("optimizing"), variational Bayes ("vb") and Markov chain Monte Carlo ("sampling"). The fastest fitting approach is to do maximum likelihood estimation via LBFGS. 
+
+```r
+methods = c("optimizing", "vb", "sampling")
+results = foreach(method = methods, .combine = bind_rows) %do% {
+  foreach(bin_pvalues = c(T,F), .combine = bind_rows) %dopar% { 
+    cpu_time = system.time( 
+      pi2_result <- pi2_estimator(p1,
+                               p2,
+                               method = method, 
+                               bin_pvalues = bin_pvalues)
+    )
+    marginal_pi0 = c(rowSums(pi2_result$pi)[1], colSums(pi2_result$pi)[1])
+    tibble( method = method, 
+            bin_pvalues = bin_pvalues,
+            jaccard = pi2_result$jaccard, 
+            jaccard_sd = pi2_result$jaccard_sd, 
+            pi0_1 = marginal_pi0[1],
+            pi0_2 = marginal_pi0[2], 
+            cpu_time = cpu_time[1])
+  }
+}
+results
+```
 
 ```
 ## # A tibble: 6 x 7
 ##   method     bin_pvalues jaccard jaccard_sd pi0_1 pi0_2 cpu_time
 ##   <chr>      <lgl>         <dbl>      <dbl> <dbl> <dbl>    <dbl>
-## 1 optimizing TRUE         0.0973     0.0371 0.869 0.622    0.747
-## 2 optimizing FALSE        0.0825     0.0248 0.905 0.541    0.148
-## 3 vb         TRUE         0.0826     0.0233 0.886 0.636   30.2  
-## 4 vb         FALSE        0.0820     0.0221 0.902 0.537    3.51 
-## 5 sampling   TRUE         0.108      0.0430 0.850 0.622  425.   
-## 6 sampling   FALSE        0.0839     0.0253 0.903 0.536   39.1
+## 1 optimizing TRUE         0.0842     0.0464 0.811 0.638    0.765
+## 2 optimizing FALSE        0.0454     0.0185 0.913 0.549    0.154
+## 3 vb         TRUE         0.0558     0.0234 0.906 0.645   24.6  
+## 4 vb         FALSE        0.0407     0.0135 0.924 0.563    3.42 
+## 5 sampling   TRUE         0.0691     0.0371 0.858 0.638  446.   
+## 6 sampling   FALSE        0.0486     0.0180 0.913 0.546   39.1
 ```
 
 The red line here shows the true Jaccard sharing index. binning pvalues does come at a cost in accuracy. 
@@ -181,7 +209,7 @@ marginal_pi1
 ```
 
 ```
-## [1] 0.09548413 0.45888194
+## [1] 0.08657623 0.45102022
 ```
 
 Plot fitted marginal p-value distributions (estimated vs true)
@@ -255,7 +283,9 @@ jacc_results
 Plot the results: we see pisquared provides unbiased and accurate sharing estimates. 
 
 ```r
-jacc_results %>% ggplot(aes(actual_jacc, est_jaccard)) + geom_point() + xlab("Actual sharing (Jaccard)") + ylab("Estimated sharing (Jaccard)") + geom_abline(intercept = 0, slope = 1)
+jacc_results %>% ggplot(aes(actual_jacc, est_jaccard)) + geom_point() + 
+  xlab("Actual sharing (Jaccard)") + ylab("Estimated sharing (Jaccard)") + 
+  geom_abline(intercept = 0, slope = 1)
 ```
 
 ![plot of chunk true-v-est-jaccard](figs/true-v-est-jaccard-1.png)
