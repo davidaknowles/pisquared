@@ -8,14 +8,12 @@ using namespace Rcpp;
 
 
 RcppExport SEXP _rcpp_module_boot_stan_fit4pi0_mod();
-RcppExport SEXP _rcpp_module_boot_stan_fit4pi0_mix_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4pi2_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4pi2_hist_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4truncated_beta_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_stan_fit4pi0_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4pi0_mod, 0},
-    {"_rcpp_module_boot_stan_fit4pi0_mix_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4pi0_mix_mod, 0},
     {"_rcpp_module_boot_stan_fit4pi2_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4pi2_mod, 0},
     {"_rcpp_module_boot_stan_fit4pi2_hist_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4pi2_hist_mod, 0},
     {"_rcpp_module_boot_stan_fit4truncated_beta_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4truncated_beta_mod, 0},

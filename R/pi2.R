@@ -182,45 +182,6 @@ model_based_pi0=function(p,
   }
 }
 
-#' @export
-model_based_pi0_mix=function(p,
-                         bin_pvalues = F,
-                         K = 10,
-                         breaks=seq(0,1,by=0.01),
-                         alpha_prior = c(2,2),
-                         beta_prior = c(2,1),
-                         storey_init = T,
-                         min_pi0_init = 0.001,
-                         max_pi0_init = .999,
-                         ...) {
-  init = list()
-  if (storey_init) {
-    init$pi0 = my_pi0est(p)$pi0
-    if (init$pi0 > max_pi0_init | init$pi0 < min_pi0_init)
-      warning(paste("Warning: Storey's pi0 is",format(init$pi0,digits=5),"\n"))
-    init$pi0 = pmin(pmax(init$pi0,min_pi0_init),max_pi0_init)
-  }
-  if (!bin_pvalues) {
-    dat = list(N = length(p),
-               weights = rep(1, length(p)),
-               pvalues = p)
-  } else {
-    h = hist(p, breaks=breaks, plot=F)
-    dat = list(N=length(h$density),
-               weights=h$counts, # normalize? i.e. use density
-               pvalues=h$mids)
-  }
-  dat$alpha_prior = alpha_prior
-  dat$beta_prior = beta_prior
-  dat$K = K
-  dat$mixture_weights_prior = rep(1/K,K)
-  optimizing( stanmodels$pi0_mix,
-                      data = dat,
-                      init = init,
-                      as_vector = F,
-                      ...)
-}
-
 #' Estimate sharing between two lists of p-values.
 #'
 #' Note the result is symmetric in p1 and p2. This will not work well if for either list all the p-values are uniform
