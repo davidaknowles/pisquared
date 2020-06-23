@@ -1,11 +1,17 @@
 ---
-title: "pisquared-extended"
+title: "Extended test of pisquared on simulated p-values"
 author: David A Knowles
 output: 
   github_document:
     toc: true
     toc_depth: 2
     fig_width: 6
+  html_vignette:
+    fig_width: 6
+vignette: >
+  %\VignetteIndexEntry{Extended test of pisquared on simulated p-values}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r global_options, include=FALSE}
@@ -32,7 +38,7 @@ theme_set(theme_bw(base_size = 14))
 ## Model-based estimation of marginal pi0
 
 Let's check how good a job we can do of estimating marginal pi0 across a range of parameters. We'll simulate some p-values with specified non-null rates. We'll use Beta(a=0.2,b=2) for the non-null pvalues: 
-```{r test-marginal}
+```{r test-marginal, warning=F}
 true_alpha = 0.2
 true_beta = 2
 N = 1000
@@ -100,7 +106,7 @@ true_jaccard
 ```
 
 pisquared can use three methods provided by stan: maximum likelihood estimation ("optimizing"), variational Bayes ("vb") and Markov chain Monte Carlo ("sampling"). The fastest fitting approach is to do maximum likelihood estimation via LBFGS. 
-```{r compare-methods, message=F}
+```{r compare-methods, message=F, warning=F}
 methods = c("optimizing", "vb", "sampling")
 results = foreach(method = methods, .combine = bind_rows) %do% {
   foreach(bin_pvalues = c(T,F), .combine = bind_rows) %dopar% { 
@@ -174,7 +180,7 @@ for (i in 1:2) {
 ## Estimating sharing across a range of underlying sharing levels
 
 Here we simulation two arrays of p-values with specific sharing ("true_jaccard") and 
-```{r vary-sharing}
+```{r vary-sharing, warning=F, message=F}
 N = 10000
 jacc_results = foreach(true_jaccard = seq(0,1,by=.1), .combine = bind_rows) %:% 
   foreach(rep = 1:10, .combine = bind_rows) %dopar% {  # .combine = bind_rows, 

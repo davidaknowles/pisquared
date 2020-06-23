@@ -1,11 +1,15 @@
 ---
-title: "pisquared-example"
+title: "Minimal working example of pisquared"
 author: David A Knowles
 output: 
   github_document:
     toc: true
     toc_depth: 2
     fig_width: 6
+vignette: >
+  %\VignetteIndexEntry{Minimal working example of pisquared}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 
 

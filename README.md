@@ -9,3 +9,14 @@ A common task in genomics is to ask how much overlap there is between two arrays
 2. The result is asymmetric: if we switch which dataset we define as "replication" vs "discovery" we get a different answer. 
 
 pisquared addresses these issues by jointly fitting a model of null and non-null p-values for both p-value arrays. For details please see the Methods section of https://elifesciences.org/articles/33480. 
+
+## Installation
+
+If you're lucky installation should be as simple as: 
+```
+if (!(require(devtools) || require(ghit))) install.packages("ghit")
+install_github("davidaknowles/pisquared", build_vignettes = F)
+```
+(`ghit` is a nice, new, lighter-weight alternative to `devtools` for installing R packages from github). 
+
+If you have problems installing it's likely an issue with `rstan` which `pisquared` heavily relies on. There's advice [here](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) that should help you get `rstan` installed, then you can try installing `pisquared` again. 
