@@ -16,5 +16,5 @@
 #'
 #' @references
 #' Stan Development Team (2019). RStan: the R interface to Stan. R package version 2.19.2. https://mc-stan.org
-#'
+#' Knowles, David A., Courtney K. Burrows, John D. Blischak, Kristen M. Patterson, Daniel J. Serie, Nadine Norton, Carole Ober, Jonathan K. Pritchard, and Yoav Gilad. 2018. “Determining the Genetic Basis of Anthracycline-Cardiotoxicity by Molecular Response QTL Mapping in Induced Cardiomyocytes.” eLife. https://doi.org/10.7554/eLife.33480.
 NULL

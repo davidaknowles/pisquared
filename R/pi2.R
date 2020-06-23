@@ -1,11 +1,11 @@
-#' Copy of qvalue's pi0est default. Included here to avoid dependency on bioconductor.
+#' Copy of qvalue's pi0est default method. Included here to avoid dependency on bioconductor.
 #'
 #' Assumes pi0.method="smoother" and smooth.log.pi0 = F (see qvalue docs).
 #'
 #' @param lambda The value of the tuning parameter to estimate pi_0. Must be in [0,1). Optional, see Storey (2002).
 #' @param smooth.df	Degrees-of-freedom to use when estimating pi_0 with a smoother. Optional.
 #' @export
-my_pi0est = function (p,
+pi0est_copy = function (p,
           lambda = seq(0.05, 0.95, 0.05),
           smooth.df = 3)
 {
@@ -132,7 +132,7 @@ model_based_pi0=function(p,
     if (!beta_fixed) init$beta_minus_one = array(tb_fit$beta - 1)
   }
   if (storey_init) {
-    init$pi0 = my_pi0est(p)$pi0
+    init$pi0 = pi0est_copy(p)$pi0
     if (init$pi0 > max_pi0_init | init$pi0 < min_pi0_init)
       warning(paste("Warning: Storey's pi0 is",format(init$pi0,digits=5),"\n"))
     init$pi0 = pmin(pmax(init$pi0,min_pi0_init),max_pi0_init)
