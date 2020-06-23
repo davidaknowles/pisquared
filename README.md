@@ -31,3 +31,5 @@ pi2_results = pi2_estimator(pvalues_1, pvalues_2)
 * `pi2_results$pi[1,2]` = π<sub>01</sub> is the proportion of tests that are null in dataset 1 but non-null in dataset 2. 
 * `pi2_results$pi[2,1]` = π<sub>10</sub> is the proportion of tests that are non-null in dataset 1 but null in dataset 2. 
 * `pi2_results$pi[2,2]` = π<sub>11</sub> is the proportion of tests that are non-null in both datasets. 
+
+pisquared should be pretty fast: on my laptop fitting for `N=1e5` pairs of p-values takes a few seconds and `N=1e6` takes about a minute. If you have much larger `N` (e.g. for eQTL studies) you might want to set `verbose=T` to see some reassuring model fitting output. If things seem painfully slow still you can set `bin_pvalues=T`, although this does decrease accuracy some amount (on simulated data). 
