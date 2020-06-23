@@ -38,7 +38,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_pi2");
-    reader.add_event(33, 31, "end", "model_pi2");
+    reader.add_event(31, 29, "end", "model_pi2");
     return reader;
 }
 
@@ -46,10 +46,10 @@ stan::io::program_reader prog_reader__() {
  class model_pi2 : public prob_grad {
 private:
         int N;
-        vector_d pvalues;
-        matrix_d weights;
+        std::vector<vector_d> pvalues;
         std::vector<double> alpha_prior;
         std::vector<double> beta_prior;
+        int beta_fixed;
 public:
     model_pi2(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -96,31 +96,20 @@ public:
 
             current_statement_begin__ = 3;
             validate_non_negative_index("pvalues", "N", N);
-            context__.validate_dims("data initialization", "pvalues", "vector_d", context__.to_vec(N));
-            pvalues = Eigen::Matrix<double, Eigen::Dynamic, 1>(N);
+            validate_non_negative_index("pvalues", "2", 2);
+            context__.validate_dims("data initialization", "pvalues", "vector_d", context__.to_vec(2,N));
+            pvalues = std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1> >(2, Eigen::Matrix<double, Eigen::Dynamic, 1>(N));
             vals_r__ = context__.vals_r("pvalues");
             pos__ = 0;
             size_t pvalues_j_1_max__ = N;
+            size_t pvalues_k_0_max__ = 2;
             for (size_t j_1__ = 0; j_1__ < pvalues_j_1_max__; ++j_1__) {
-                pvalues(j_1__) = vals_r__[pos__++];
-            }
-
-            current_statement_begin__ = 4;
-            validate_non_negative_index("weights", "N", N);
-            validate_non_negative_index("weights", "N", N);
-            context__.validate_dims("data initialization", "weights", "matrix_d", context__.to_vec(N,N));
-            weights = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(N, N);
-            vals_r__ = context__.vals_r("weights");
-            pos__ = 0;
-            size_t weights_j_2_max__ = N;
-            size_t weights_j_1_max__ = N;
-            for (size_t j_2__ = 0; j_2__ < weights_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < weights_j_1_max__; ++j_1__) {
-                    weights(j_1__, j_2__) = vals_r__[pos__++];
+                for (size_t k_0__ = 0; k_0__ < pvalues_k_0_max__; ++k_0__) {
+                    pvalues[k_0__](j_1__) = vals_r__[pos__++];
                 }
             }
 
-            current_statement_begin__ = 5;
+            current_statement_begin__ = 4;
             validate_non_negative_index("alpha_prior", "2", 2);
             context__.validate_dims("data initialization", "alpha_prior", "double", context__.to_vec(2));
             alpha_prior = std::vector<double>(2, double(0));
@@ -131,7 +120,7 @@ public:
                 alpha_prior[k_0__] = vals_r__[pos__++];
             }
 
-            current_statement_begin__ = 6;
+            current_statement_begin__ = 5;
             validate_non_negative_index("beta_prior", "2", 2);
             context__.validate_dims("data initialization", "beta_prior", "double", context__.to_vec(2));
             beta_prior = std::vector<double>(2, double(0));
@@ -141,6 +130,15 @@ public:
             for (size_t k_0__ = 0; k_0__ < beta_prior_k_0_max__; ++k_0__) {
                 beta_prior[k_0__] = vals_r__[pos__++];
             }
+
+            current_statement_begin__ = 6;
+            context__.validate_dims("data initialization", "beta_fixed", "int", context__.to_vec());
+            beta_fixed = int(0);
+            vals_i__ = context__.vals_i("beta_fixed");
+            pos__ = 0;
+            beta_fixed = vals_i__[pos__++];
+            check_greater_or_equal(function__, "beta_fixed", beta_fixed, 0);
+            check_less_or_equal(function__, "beta_fixed", beta_fixed, 1);
 
 
             // initialize transformed data variables
@@ -152,14 +150,14 @@ public:
             num_params_r__ = 0U;
             param_ranges_i__.clear();
             current_statement_begin__ = 9;
-            validate_non_negative_index("pi0", "4", 4);
+            validate_non_negative_index("pi_array", "4", 4);
             num_params_r__ += (4 - 1);
             current_statement_begin__ = 10;
             validate_non_negative_index("alpha", "2", 2);
             num_params_r__ += (1 * 2);
             current_statement_begin__ = 11;
-            validate_non_negative_index("beta_minus_one", "2", 2);
-            num_params_r__ += (1 * 2);
+            validate_non_negative_index("beta_minus_one", "(beta_fixed ? 0 : 2 )", (beta_fixed ? 0 : 2 ));
+            num_params_r__ += (1 * (beta_fixed ? 0 : 2 ));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
             // Next line prevents compiler griping about no return
@@ -182,21 +180,21 @@ public:
         std::vector<int> vals_i__;
 
         current_statement_begin__ = 9;
-        if (!(context__.contains_r("pi0")))
-            stan::lang::rethrow_located(std::runtime_error(std::string("Variable pi0 missing")), current_statement_begin__, prog_reader__());
-        vals_r__ = context__.vals_r("pi0");
+        if (!(context__.contains_r("pi_array")))
+            stan::lang::rethrow_located(std::runtime_error(std::string("Variable pi_array missing")), current_statement_begin__, prog_reader__());
+        vals_r__ = context__.vals_r("pi_array");
         pos__ = 0U;
-        validate_non_negative_index("pi0", "4", 4);
-        context__.validate_dims("parameter initialization", "pi0", "vector_d", context__.to_vec(4));
-        Eigen::Matrix<double, Eigen::Dynamic, 1> pi0(4);
-        size_t pi0_j_1_max__ = 4;
-        for (size_t j_1__ = 0; j_1__ < pi0_j_1_max__; ++j_1__) {
-            pi0(j_1__) = vals_r__[pos__++];
+        validate_non_negative_index("pi_array", "4", 4);
+        context__.validate_dims("parameter initialization", "pi_array", "vector_d", context__.to_vec(4));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> pi_array(4);
+        size_t pi_array_j_1_max__ = 4;
+        for (size_t j_1__ = 0; j_1__ < pi_array_j_1_max__; ++j_1__) {
+            pi_array(j_1__) = vals_r__[pos__++];
         }
         try {
-            writer__.simplex_unconstrain(pi0);
+            writer__.simplex_unconstrain(pi_array);
         } catch (const std::exception& e) {
-            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable pi0: ") + e.what()), current_statement_begin__, prog_reader__());
+            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable pi_array: ") + e.what()), current_statement_begin__, prog_reader__());
         }
 
         current_statement_begin__ = 10;
@@ -225,14 +223,14 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable beta_minus_one missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("beta_minus_one");
         pos__ = 0U;
-        validate_non_negative_index("beta_minus_one", "2", 2);
-        context__.validate_dims("parameter initialization", "beta_minus_one", "double", context__.to_vec(2));
-        std::vector<double> beta_minus_one(2, double(0));
-        size_t beta_minus_one_k_0_max__ = 2;
+        validate_non_negative_index("beta_minus_one", "(beta_fixed ? 0 : 2 )", (beta_fixed ? 0 : 2 ));
+        context__.validate_dims("parameter initialization", "beta_minus_one", "double", context__.to_vec((beta_fixed ? 0 : 2 )));
+        std::vector<double> beta_minus_one((beta_fixed ? 0 : 2 ), double(0));
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 2 );
         for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
             beta_minus_one[k_0__] = vals_r__[pos__++];
         }
-        size_t beta_minus_one_i_0_max__ = 2;
+        size_t beta_minus_one_i_0_max__ = (beta_fixed ? 0 : 2 );
         for (size_t i_0__ = 0; i_0__ < beta_minus_one_i_0_max__; ++i_0__) {
             try {
                 writer__.scalar_lb_unconstrain(0, beta_minus_one[i_0__]);
@@ -274,12 +272,12 @@ public:
 
             // model parameters
             current_statement_begin__ = 9;
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> pi0;
-            (void) pi0;  // dummy to suppress unused var warning
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> pi_array;
+            (void) pi_array;  // dummy to suppress unused var warning
             if (jacobian__)
-                pi0 = in__.simplex_constrain(4, lp__);
+                pi_array = in__.simplex_constrain(4, lp__);
             else
-                pi0 = in__.simplex_constrain(4);
+                pi_array = in__.simplex_constrain(4);
 
             current_statement_begin__ = 10;
             std::vector<local_scalar_t__> alpha;
@@ -294,7 +292,7 @@ public:
 
             current_statement_begin__ = 11;
             std::vector<local_scalar_t__> beta_minus_one;
-            size_t beta_minus_one_d_0_max__ = 2;
+            size_t beta_minus_one_d_0_max__ = (beta_fixed ? 0 : 2 );
             beta_minus_one.reserve(beta_minus_one_d_0_max__);
             for (size_t d_0__ = 0; d_0__ < beta_minus_one_d_0_max__; ++d_0__) {
                 if (jacobian__)
@@ -312,15 +310,13 @@ public:
 
             // transformed parameters block statements
             current_statement_begin__ = 15;
-            stan::model::assign(beta, 
-                        stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
-                        (get_base1(beta_minus_one, 1, "beta_minus_one", 1) + 1), 
-                        "assigning variable beta");
-            current_statement_begin__ = 16;
-            stan::model::assign(beta, 
-                        stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
-                        (get_base1(beta_minus_one, 2, "beta_minus_one", 1) + 1), 
-                        "assigning variable beta");
+            for (int i = 1; i <= 2; ++i) {
+                current_statement_begin__ = 16;
+                stan::model::assign(beta, 
+                            stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
+                            (beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, i, "beta_minus_one", 1) + 1.0)) ), 
+                            "assigning variable beta");
+            }
 
             // validate transformed parameters
             const char* function__ = "validate transformed params";
@@ -341,43 +337,42 @@ public:
             current_statement_begin__ = 19;
             lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
             current_statement_begin__ = 20;
-            lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
+            if (as_bool(logical_gt(get_base1(beta_prior, 2, "beta_prior", 1), 0))) {
+                current_statement_begin__ = 20;
+                lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
+            }
             current_statement_begin__ = 21;
             for (int i = 1; i <= N; ++i) {
-
+                {
                 current_statement_begin__ = 22;
-                for (int j = 1; j <= N; ++j) {
-                    {
-                    current_statement_begin__ = 23;
-                    validate_non_negative_index("temp", "4", 4);
-                    Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> temp(4);
-                    stan::math::initialize(temp, DUMMY_VAR__);
-                    stan::math::fill(temp, DUMMY_VAR__);
+                validate_non_negative_index("temp", "4", 4);
+                Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> temp(4);
+                stan::math::initialize(temp, DUMMY_VAR__);
+                stan::math::fill(temp, DUMMY_VAR__);
 
 
-                    current_statement_begin__ = 24;
-                    stan::model::assign(temp, 
-                                stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
-                                ((stan::math::log(get_base1(pi0, 1, "pi0", 1)) + beta_log(get_base1(pvalues, i, "pvalues", 1), 1, 1)) + beta_log(get_base1(pvalues, j, "pvalues", 1), 1, 1)), 
-                                "assigning variable temp");
-                    current_statement_begin__ = 25;
-                    stan::model::assign(temp, 
-                                stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
-                                ((stan::math::log(get_base1(pi0, 2, "pi0", 1)) + beta_log(get_base1(pvalues, i, "pvalues", 1), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(pvalues, j, "pvalues", 1), 1, 1)), 
-                                "assigning variable temp");
-                    current_statement_begin__ = 26;
-                    stan::model::assign(temp, 
-                                stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()), 
-                                ((stan::math::log(get_base1(pi0, 3, "pi0", 1)) + beta_log(get_base1(pvalues, i, "pvalues", 1), 1, 1)) + beta_log(get_base1(pvalues, j, "pvalues", 1), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
-                                "assigning variable temp");
-                    current_statement_begin__ = 27;
-                    stan::model::assign(temp, 
-                                stan::model::cons_list(stan::model::index_uni(4), stan::model::nil_index_list()), 
-                                ((stan::math::log(get_base1(pi0, 4, "pi0", 1)) + beta_log(get_base1(pvalues, i, "pvalues", 1), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(pvalues, j, "pvalues", 1), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
-                                "assigning variable temp");
-                    current_statement_begin__ = 28;
-                    lp_accum__.add((get_base1(weights, i, j, "weights", 1) * log_sum_exp(temp)));
-                    }
+                current_statement_begin__ = 23;
+                stan::model::assign(temp, 
+                            stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
+                            ((stan::math::log(get_base1(pi_array, 1, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), 1, 1)) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), 1, 1)), 
+                            "assigning variable temp");
+                current_statement_begin__ = 24;
+                stan::model::assign(temp, 
+                            stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
+                            ((stan::math::log(get_base1(pi_array, 2, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), 1, 1)), 
+                            "assigning variable temp");
+                current_statement_begin__ = 25;
+                stan::model::assign(temp, 
+                            stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()), 
+                            ((stan::math::log(get_base1(pi_array, 3, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), 1, 1)) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
+                            "assigning variable temp");
+                current_statement_begin__ = 26;
+                stan::model::assign(temp, 
+                            stan::model::cons_list(stan::model::index_uni(4), stan::model::nil_index_list()), 
+                            ((stan::math::log(get_base1(pi_array, 4, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
+                            "assigning variable temp");
+                current_statement_begin__ = 27;
+                lp_accum__.add(log_sum_exp(temp));
                 }
             }
 
@@ -406,7 +401,7 @@ public:
 
     void get_param_names(std::vector<std::string>& names__) const {
         names__.resize(0);
-        names__.push_back("pi0");
+        names__.push_back("pi_array");
         names__.push_back("alpha");
         names__.push_back("beta_minus_one");
         names__.push_back("beta");
@@ -423,7 +418,7 @@ public:
         dims__.push_back(2);
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(2);
+        dims__.push_back((beta_fixed ? 0 : 2 ));
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(2);
@@ -446,10 +441,10 @@ public:
         (void) function__;  // dummy to suppress unused var warning
 
         // read-transform, write parameters
-        Eigen::Matrix<double, Eigen::Dynamic, 1> pi0 = in__.simplex_constrain(4);
-        size_t pi0_j_1_max__ = 4;
-        for (size_t j_1__ = 0; j_1__ < pi0_j_1_max__; ++j_1__) {
-            vars__.push_back(pi0(j_1__));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> pi_array = in__.simplex_constrain(4);
+        size_t pi_array_j_1_max__ = 4;
+        for (size_t j_1__ = 0; j_1__ < pi_array_j_1_max__; ++j_1__) {
+            vars__.push_back(pi_array(j_1__));
         }
 
         std::vector<double> alpha;
@@ -464,12 +459,12 @@ public:
         }
 
         std::vector<double> beta_minus_one;
-        size_t beta_minus_one_d_0_max__ = 2;
+        size_t beta_minus_one_d_0_max__ = (beta_fixed ? 0 : 2 );
         beta_minus_one.reserve(beta_minus_one_d_0_max__);
         for (size_t d_0__ = 0; d_0__ < beta_minus_one_d_0_max__; ++d_0__) {
             beta_minus_one.push_back(in__.scalar_lb_constrain(0));
         }
-        size_t beta_minus_one_k_0_max__ = 2;
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 2 );
         for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
             vars__.push_back(beta_minus_one[k_0__]);
         }
@@ -493,15 +488,13 @@ public:
 
             // do transformed parameters statements
             current_statement_begin__ = 15;
-            stan::model::assign(beta, 
-                        stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
-                        (get_base1(beta_minus_one, 1, "beta_minus_one", 1) + 1), 
-                        "assigning variable beta");
-            current_statement_begin__ = 16;
-            stan::model::assign(beta, 
-                        stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
-                        (get_base1(beta_minus_one, 2, "beta_minus_one", 1) + 1), 
-                        "assigning variable beta");
+            for (int i = 1; i <= 2; ++i) {
+                current_statement_begin__ = 16;
+                stan::model::assign(beta, 
+                            stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
+                            (beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, i, "beta_minus_one", 1) + 1.0)) ), 
+                            "assigning variable beta");
+            }
 
             if (!include_gqs__ && !include_tparams__) return;
             // validate transformed parameters
@@ -550,10 +543,10 @@ public:
                                  bool include_tparams__ = true,
                                  bool include_gqs__ = true) const {
         std::stringstream param_name_stream__;
-        size_t pi0_j_1_max__ = 4;
-        for (size_t j_1__ = 0; j_1__ < pi0_j_1_max__; ++j_1__) {
+        size_t pi_array_j_1_max__ = 4;
+        for (size_t j_1__ = 0; j_1__ < pi_array_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "pi0" << '.' << j_1__ + 1;
+            param_name_stream__ << "pi_array" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         size_t alpha_k_0_max__ = 2;
@@ -562,7 +555,7 @@ public:
             param_name_stream__ << "alpha" << '.' << k_0__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t beta_minus_one_k_0_max__ = 2;
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 2 );
         for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "beta_minus_one" << '.' << k_0__ + 1;
@@ -588,10 +581,10 @@ public:
                                    bool include_tparams__ = true,
                                    bool include_gqs__ = true) const {
         std::stringstream param_name_stream__;
-        size_t pi0_j_1_max__ = (4 - 1);
-        for (size_t j_1__ = 0; j_1__ < pi0_j_1_max__; ++j_1__) {
+        size_t pi_array_j_1_max__ = (4 - 1);
+        for (size_t j_1__ = 0; j_1__ < pi_array_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "pi0" << '.' << j_1__ + 1;
+            param_name_stream__ << "pi_array" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         size_t alpha_k_0_max__ = 2;
@@ -600,7 +593,7 @@ public:
             param_name_stream__ << "alpha" << '.' << k_0__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t beta_minus_one_k_0_max__ = 2;
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 2 );
         for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "beta_minus_one" << '.' << k_0__ + 1;

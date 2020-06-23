@@ -4,15 +4,40 @@
 \alias{model_based_pi0}
 \title{MAP fit of pi0 assuming non-null come from a beta distribution.}
 \usage{
-model_based_pi0(p, breaks = seq(0, 1, by = 0.01), alpha_prior = c(2,
-  2), beta_prior = c(2, 1), ...)
+model_based_pi0(p, bin_pvalues = F, breaks = seq(0, 1, by = 0.01),
+  alpha_prior = c(2, 2), beta_prior = c(2, 1), beta_fixed = F,
+  truncated_beta_init = T, storey_init = T, min_pi0_init = 0.001,
+  max_pi0_init = 0.999, method = "optimizing", draws = 1000,
+  chains = 1, refresh = 0, ...)
 }
 \arguments{
 \item{p}{Samples (p-values for pisquared's application)}
 
+\item{bin_pvalues}{Whether to bin pvalues rather than using raw p-values. Can be more scalable.}
+
+\item{breaks}{Grid for estimating p-value histogram (only used if bin_pvalues is True).}
+
 \item{alpha_prior}{Shape1 and shape2 of beta() prior on alpha. Shape1,shape2 > 1 prevents alpha collapsing to 0 or 1.}
 
 \item{beta_prior}{Shape and rate of prior on beta_minus_one. Shape>1 enforces beta > 1.}
+
+\item{beta_fixed}{Whether to fix beta = 1.}
+
+\item{truncated_beta_init}{Whether to initalize the beta distribution parameters using a truncated beta on significant p-values.}
+
+\item{storey_init}{Whether to initialize pi0 using Storey's qvalue method.}
+
+\item{min_pi0_init}{Minimum allowed pi0 initialization from Storey's method.}
+
+\item{max_pi0_init}{Maximum allowed pi0 initialization from Storey's method.}
+
+\item{method}{Can be "optimizing", "vb" or "sampling", determines approach for fitting stan model.}
+
+\item{draws}{Only used if method=="optimizing": draw this many samples using Laplace's method (uses the Hessian of the loglikelihood at the optimum). These are used to get approximate standard errors on each parameter.}
+
+\item{chains}{Only used if method=="sampling": sets the number of MCMC chains to run.}
+
+\item{refresh}{Only used if method=="vb": sets how frequently to output fitting info to stdout.}
 
 \item{...}{passed to rstan fitting function choosen by `method`}
 }

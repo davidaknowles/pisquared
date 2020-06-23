@@ -1,14 +1,14 @@
 Package: pisquared
-Title: What the Package Does (One Line, Title Case)
+Title: A Mixture Modeling Approach to Estimating the Proportion of Shared Non-null Hypotheses
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "David",
+           family = "Knowles",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: What license it uses
+           email = "dak2173@columbia.edu",
+           comment = c(ORCID = "0000-0002-7408-146X"))
+Description: A common task in genomics is to ask how much overlap there is between two arrays of hypothesis tests over some common set (e.g. genes) in two different datasets. For example, we might perform differential expression analysis between two conditions in a "discovery" dataset and then ask how frequently our findings replicate in another "replication" dataset. A popular approach is to select non-null genes at a specific significance threshold in the discovery cohort, and then estimate Storey's π0 for those non-null genes in the discovery cohort. Two aspects are dis-satisfying about this approach: 1) While we avoid setting an explicit significance threshold in the replication cohort, we still had to do this in the discovery cohort. 2) The result is asymmetric: if we switch which dataset we define as "replication" vs "discovery" we get a different answer. pisquared addresses these issues by jointly fitting a model of null and non-null p-values for both p-value arrays.
+License: GPL3
 Encoding: UTF-8
 LazyData: true
 Biarch: true

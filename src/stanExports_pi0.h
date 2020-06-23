@@ -38,7 +38,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_pi0");
-    reader.add_event(24, 22, "end", "model_pi0");
+    reader.add_event(25, 23, "end", "model_pi0");
     return reader;
 }
 
@@ -48,6 +48,7 @@ private:
         int N;
         vector_d pvalues;
         vector_d weights;
+        int beta_fixed;
         std::vector<double> alpha_prior;
         std::vector<double> beta_prior;
 public:
@@ -117,6 +118,15 @@ public:
             }
 
             current_statement_begin__ = 5;
+            context__.validate_dims("data initialization", "beta_fixed", "int", context__.to_vec());
+            beta_fixed = int(0);
+            vals_i__ = context__.vals_i("beta_fixed");
+            pos__ = 0;
+            beta_fixed = vals_i__[pos__++];
+            check_greater_or_equal(function__, "beta_fixed", beta_fixed, 0);
+            check_less_or_equal(function__, "beta_fixed", beta_fixed, 1);
+
+            current_statement_begin__ = 6;
             validate_non_negative_index("alpha_prior", "2", 2);
             context__.validate_dims("data initialization", "alpha_prior", "double", context__.to_vec(2));
             alpha_prior = std::vector<double>(2, double(0));
@@ -127,7 +137,7 @@ public:
                 alpha_prior[k_0__] = vals_r__[pos__++];
             }
 
-            current_statement_begin__ = 6;
+            current_statement_begin__ = 7;
             validate_non_negative_index("beta_prior", "2", 2);
             context__.validate_dims("data initialization", "beta_prior", "double", context__.to_vec(2));
             beta_prior = std::vector<double>(2, double(0));
@@ -147,12 +157,13 @@ public:
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 9;
-            num_params_r__ += 1;
             current_statement_begin__ = 10;
             num_params_r__ += 1;
             current_statement_begin__ = 11;
             num_params_r__ += 1;
+            current_statement_begin__ = 12;
+            validate_non_negative_index("beta_minus_one", "(beta_fixed ? 0 : 1 )", (beta_fixed ? 0 : 1 ));
+            num_params_r__ += (1 * (beta_fixed ? 0 : 1 ));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
             // Next line prevents compiler griping about no return
@@ -174,7 +185,7 @@ public:
         std::vector<double> vals_r__;
         std::vector<int> vals_i__;
 
-        current_statement_begin__ = 9;
+        current_statement_begin__ = 10;
         if (!(context__.contains_r("pi0")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable pi0 missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("pi0");
@@ -188,7 +199,7 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable pi0: ") + e.what()), current_statement_begin__, prog_reader__());
         }
 
-        current_statement_begin__ = 10;
+        current_statement_begin__ = 11;
         if (!(context__.contains_r("alpha")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable alpha missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("alpha");
@@ -202,18 +213,25 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable alpha: ") + e.what()), current_statement_begin__, prog_reader__());
         }
 
-        current_statement_begin__ = 11;
+        current_statement_begin__ = 12;
         if (!(context__.contains_r("beta_minus_one")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable beta_minus_one missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("beta_minus_one");
         pos__ = 0U;
-        context__.validate_dims("parameter initialization", "beta_minus_one", "double", context__.to_vec());
-        double beta_minus_one(0);
-        beta_minus_one = vals_r__[pos__++];
-        try {
-            writer__.scalar_lb_unconstrain(0, beta_minus_one);
-        } catch (const std::exception& e) {
-            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable beta_minus_one: ") + e.what()), current_statement_begin__, prog_reader__());
+        validate_non_negative_index("beta_minus_one", "(beta_fixed ? 0 : 1 )", (beta_fixed ? 0 : 1 ));
+        context__.validate_dims("parameter initialization", "beta_minus_one", "double", context__.to_vec((beta_fixed ? 0 : 1 )));
+        std::vector<double> beta_minus_one((beta_fixed ? 0 : 1 ), double(0));
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 1 );
+        for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
+            beta_minus_one[k_0__] = vals_r__[pos__++];
+        }
+        size_t beta_minus_one_i_0_max__ = (beta_fixed ? 0 : 1 );
+        for (size_t i_0__ = 0; i_0__ < beta_minus_one_i_0_max__; ++i_0__) {
+            try {
+                writer__.scalar_lb_unconstrain(0, beta_minus_one[i_0__]);
+            } catch (const std::exception& e) {
+                stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable beta_minus_one: ") + e.what()), current_statement_begin__, prog_reader__());
+            }
         }
 
         params_r__ = writer__.data_r();
@@ -248,7 +266,7 @@ public:
             stan::io::reader<local_scalar_t__> in__(params_r__, params_i__);
 
             // model parameters
-            current_statement_begin__ = 9;
+            current_statement_begin__ = 10;
             local_scalar_t__ pi0;
             (void) pi0;  // dummy to suppress unused var warning
             if (jacobian__)
@@ -256,7 +274,7 @@ public:
             else
                 pi0 = in__.scalar_lub_constrain(0, 1);
 
-            current_statement_begin__ = 10;
+            current_statement_begin__ = 11;
             local_scalar_t__ alpha;
             (void) alpha;  // dummy to suppress unused var warning
             if (jacobian__)
@@ -264,27 +282,30 @@ public:
             else
                 alpha = in__.scalar_lub_constrain(0, 1);
 
-            current_statement_begin__ = 11;
-            local_scalar_t__ beta_minus_one;
-            (void) beta_minus_one;  // dummy to suppress unused var warning
-            if (jacobian__)
-                beta_minus_one = in__.scalar_lb_constrain(0, lp__);
-            else
-                beta_minus_one = in__.scalar_lb_constrain(0);
+            current_statement_begin__ = 12;
+            std::vector<local_scalar_t__> beta_minus_one;
+            size_t beta_minus_one_d_0_max__ = (beta_fixed ? 0 : 1 );
+            beta_minus_one.reserve(beta_minus_one_d_0_max__);
+            for (size_t d_0__ = 0; d_0__ < beta_minus_one_d_0_max__; ++d_0__) {
+                if (jacobian__)
+                    beta_minus_one.push_back(in__.scalar_lb_constrain(0, lp__));
+                else
+                    beta_minus_one.push_back(in__.scalar_lb_constrain(0));
+            }
 
             // transformed parameters
-            current_statement_begin__ = 14;
+            current_statement_begin__ = 15;
             local_scalar_t__ beta;
             (void) beta;  // dummy to suppress unused var warning
             stan::math::initialize(beta, DUMMY_VAR__);
             stan::math::fill(beta, DUMMY_VAR__);
-            stan::math::assign(beta,(beta_minus_one + 1.0));
+            stan::math::assign(beta,(beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, 1, "beta_minus_one", 1) + 1.0)) ));
 
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
 
-            current_statement_begin__ = 14;
+            current_statement_begin__ = 15;
             if (stan::math::is_uninitialized(beta)) {
                 std::stringstream msg__;
                 msg__ << "Undefined transformed parameter: beta";
@@ -293,14 +314,17 @@ public:
 
             // model body
 
-            current_statement_begin__ = 17;
-            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
             current_statement_begin__ = 18;
-            lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
+            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
             current_statement_begin__ = 19;
+            if (as_bool(logical_gt(get_base1(beta_prior, 2, "beta_prior", 1), 0))) {
+                current_statement_begin__ = 19;
+                lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
+            }
+            current_statement_begin__ = 20;
             for (int i = 1; i <= N; ++i) {
 
-                current_statement_begin__ = 20;
+                current_statement_begin__ = 21;
                 lp_accum__.add((get_base1(weights, i, "weights", 1) * log_sum_exp((stan::math::log(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), 1, 1)), (log1m(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), alpha, beta)))));
             }
 
@@ -344,6 +368,7 @@ public:
         dims__.resize(0);
         dimss__.push_back(dims__);
         dims__.resize(0);
+        dims__.push_back((beta_fixed ? 0 : 1 ));
         dimss__.push_back(dims__);
         dims__.resize(0);
         dimss__.push_back(dims__);
@@ -371,8 +396,16 @@ public:
         double alpha = in__.scalar_lub_constrain(0, 1);
         vars__.push_back(alpha);
 
-        double beta_minus_one = in__.scalar_lb_constrain(0);
-        vars__.push_back(beta_minus_one);
+        std::vector<double> beta_minus_one;
+        size_t beta_minus_one_d_0_max__ = (beta_fixed ? 0 : 1 );
+        beta_minus_one.reserve(beta_minus_one_d_0_max__);
+        for (size_t d_0__ = 0; d_0__ < beta_minus_one_d_0_max__; ++d_0__) {
+            beta_minus_one.push_back(in__.scalar_lb_constrain(0));
+        }
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 1 );
+        for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
+            vars__.push_back(beta_minus_one[k_0__]);
+        }
 
         double lp__ = 0.0;
         (void) lp__;  // dummy to suppress unused var warning
@@ -385,12 +418,12 @@ public:
 
         try {
             // declare and define transformed parameters
-            current_statement_begin__ = 14;
+            current_statement_begin__ = 15;
             double beta;
             (void) beta;  // dummy to suppress unused var warning
             stan::math::initialize(beta, DUMMY_VAR__);
             stan::math::fill(beta, DUMMY_VAR__);
-            stan::math::assign(beta,(beta_minus_one + 1.0));
+            stan::math::assign(beta,(beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, 1, "beta_minus_one", 1) + 1.0)) ));
 
             if (!include_gqs__ && !include_tparams__) return;
             // validate transformed parameters
@@ -442,9 +475,12 @@ public:
         param_name_stream__.str(std::string());
         param_name_stream__ << "alpha";
         param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "beta_minus_one";
-        param_names__.push_back(param_name_stream__.str());
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 1 );
+        for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "beta_minus_one" << '.' << k_0__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
 
         if (!include_gqs__ && !include_tparams__) return;
 
@@ -468,9 +504,12 @@ public:
         param_name_stream__.str(std::string());
         param_name_stream__ << "alpha";
         param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "beta_minus_one";
-        param_names__.push_back(param_name_stream__.str());
+        size_t beta_minus_one_k_0_max__ = (beta_fixed ? 0 : 1 );
+        for (size_t k_0__ = 0; k_0__ < beta_minus_one_k_0_max__; ++k_0__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "beta_minus_one" << '.' << k_0__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
 
         if (!include_gqs__ && !include_tparams__) return;
 

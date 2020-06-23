@@ -2,7 +2,11 @@
 
 export(fit_truncated_beta)
 export(model_based_pi0)
+export(model_based_pi0_mix)
+export(my_pi0est)
 export(pi2_estimator)
+export(simulate_joint_pvalues)
+export(simulate_pvalues)
 import(Rcpp)
 import(doMC)
 import(foreach)

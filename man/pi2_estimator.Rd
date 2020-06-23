@@ -4,25 +4,42 @@
 \alias{pi2_estimator}
 \title{Estimate sharing between two lists of p-values.}
 \usage{
-pi2_estimator(p1, p2, breaks = seq(0, 1, by = 0.01), restarts = 5)
+pi2_estimator(p1, p2, bin_pvalues = F, breaks = seq(0, 1, by = 0.01),
+  alpha_prior = c(2, 2), beta_prior = c(2, 1), beta_fixed = F,
+  truncated_beta_init = T, storey_init = T, method = "optimizing",
+  draws = 1000, chains = 1, refresh = 0, ...)
 }
 \arguments{
 \item{p1}{First list of p-values}
 
 \item{p2}{Second list of p-values}
 
-\item{breaks}{Grid for estimating p-value histogram}
+\item{bin_pvalues}{Whether to bin pvalues rather than using raw p-values. Can be more scalable.}
 
-\item{restarts}{Number of random restarts to perform.}
+\item{breaks}{Grid for estimating p-value histogram. Set to NULL for no binning (no pvalues can be 0!)}
 
 \item{alpha_prior}{Shape1 and shape2 of beta() prior on alpha. Shape1,shape2 > 1 prevents alpha collapsing to 0 or 1.}
 
 \item{beta_prior}{Shape and rate of prior on beta_minus_one. Shape>1 enforces beta > 1.}
 
+\item{beta_fixed}{Whether to fix beta = 1.}
+
+\item{truncated_beta_init}{Whether to initalize the beta distribution parameters using a truncated beta on significant p-values.}
+
+\item{storey_init}{Whether to initialize pi0 using Storey's qvalue method.}
+
+\item{method}{Can be "optimizing", "vb" or "sampling", determines approach for fitting stan model.}
+
+\item{draws}{Only used if method=="optimizing": draw this many samples using Laplace's method (uses the Hessian of the loglikelihood at the optimum). These are used to get approximate standard errors on each parameter.}
+
+\item{chains}{Only used if method=="sampling": sets the number of MCMC chains to run.}
+
+\item{refresh}{Only used if method=="vb": sets how frequently to output fitting info to stdout.}
+
 \item{...}{passed to rstan fitting function choosen by `method`}
 }
 \value{
-List of jaccard index and fitted model parameters.
+List of jaccard index, fitted model parameters, the stan fit object and the initiailization used.
 }
 \description{
 Note the result is symmetric in p1 and p2. This will not work well if for either list all the p-values are uniform

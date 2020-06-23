@@ -4,19 +4,28 @@
 \alias{fit_truncated_beta}
 \title{Fit a beta distribution truncated to [0,upperlimit]}
 \usage{
-fit_truncated_beta(p, upper_limit, alpha_prior = c(2, 2),
-  beta_prior = c(2, 1), method = "optimizing", ...)
+fit_truncated_beta(p, fdr = 0.05, minimum_sig = 3, alpha_prior = c(2,
+  2), beta_prior = c(2, 1), method = "optimizing", beta_fixed = F,
+  chains = 1, refresh = 0, ...)
 }
 \arguments{
 \item{p}{Samples (p-values for pisquared's application)}
 
-\item{upper_limit}{Upper limit of truncation (lower limit is fixed to 0)}
+\item{fdr}{FDR threshold to use to define a set of "significant" p-values to fit the truncated beta to.}
+
+\item{minimum_sig}{Require at least this many "significant" p-values for fitting. Otherwise return reasonable default.}
 
 \item{alpha_prior}{Shape1 and shape2 of beta() prior on alpha. Shape1,shape2 > 1 prevents alpha collapsing to 0 or 1.}
 
 \item{beta_prior}{Shape and rate of prior on beta_minus_one. Shape>1 enforces beta > 1.}
 
 \item{method}{Can be "optimizing", "vb" or "sampling", determines approach for fitting stan model.}
+
+\item{beta_fixed}{Whether to fix beta = 1.}
+
+\item{chains}{Only used if method=="sampling": sets the number of MCMC chains to run.}
+
+\item{refresh}{Only used if method=="vb": sets how frequently to output fitting info to stdout.}
 
 \item{...}{passed to rstan fitting function choosen by `method`}
 }
