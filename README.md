@@ -26,7 +26,7 @@ If you have problems installing it's likely an issue with `rstan` which `pisquar
 ```
 pi2_results = pi2_estimator(pvalues_1, pvalues_2) 
 ```
-`pi2_results$jaccard` is the estimated Jaccard index, and `pi2_results$pi` is the π matrix where
+`pi2_results$jaccard`=π<sub>11</sub>/(1 - π<sub>00</sub>) is the estimated Jaccard index, and `pi2_results$pi` is the estimated π matrix where
 * `pi2_results$pi[1,1]` = π<sub>00</sub> is the proportion of tests that are null in dataset 1 and 2. 
 * `pi2_results$pi[1,2]` = π<sub>01</sub> is the proportion of tests that are null in dataset 1 but non-null in dataset 2. 
 * `pi2_results$pi[2,1]` = π<sub>10</sub> is the proportion of tests that are non-null in dataset 1 but null in dataset 2. 
