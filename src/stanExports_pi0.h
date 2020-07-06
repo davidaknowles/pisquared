@@ -38,7 +38,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_pi0");
-    reader.add_event(25, 23, "end", "model_pi0");
+    reader.add_event(27, 25, "end", "model_pi0");
     return reader;
 }
 
@@ -313,19 +313,32 @@ public:
             }
 
             // model body
-
+            {
             current_statement_begin__ = 18;
-            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
+            validate_non_negative_index("summands", "N", N);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> summands(N);
+            stan::math::initialize(summands, DUMMY_VAR__);
+            stan::math::fill(summands, DUMMY_VAR__);
+
+
             current_statement_begin__ = 19;
+            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
+            current_statement_begin__ = 20;
             if (as_bool(logical_gt(get_base1(beta_prior, 2, "beta_prior", 1), 0))) {
-                current_statement_begin__ = 19;
+                current_statement_begin__ = 20;
                 lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
             }
-            current_statement_begin__ = 20;
+            current_statement_begin__ = 21;
             for (int i = 1; i <= N; ++i) {
 
-                current_statement_begin__ = 21;
-                lp_accum__.add((get_base1(weights, i, "weights", 1) * log_sum_exp((stan::math::log(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), 1, 1)), (log1m(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), alpha, beta)))));
+                current_statement_begin__ = 22;
+                stan::model::assign(summands, 
+                            stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
+                            (get_base1(weights, i, "weights", 1) * log_sum_exp((stan::math::log(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), 1, 1)), (log1m(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), alpha, beta)))), 
+                            "assigning variable summands");
+            }
+            current_statement_begin__ = 24;
+            lp_accum__.add(sum(summands));
             }
 
         } catch (const std::exception& e) {

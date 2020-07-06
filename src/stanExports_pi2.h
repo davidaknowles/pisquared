@@ -38,7 +38,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_pi2");
-    reader.add_event(31, 29, "end", "model_pi2");
+    reader.add_event(33, 31, "end", "model_pi2");
     return reader;
 }
 
@@ -333,47 +333,60 @@ public:
             }
 
             // model body
-
+            {
             current_statement_begin__ = 19;
-            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
+            validate_non_negative_index("summands", "N", N);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> summands(N);
+            stan::math::initialize(summands, DUMMY_VAR__);
+            stan::math::fill(summands, DUMMY_VAR__);
+
+
             current_statement_begin__ = 20;
+            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
+            current_statement_begin__ = 21;
             if (as_bool(logical_gt(get_base1(beta_prior, 2, "beta_prior", 1), 0))) {
-                current_statement_begin__ = 20;
+                current_statement_begin__ = 21;
                 lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
             }
-            current_statement_begin__ = 21;
+            current_statement_begin__ = 22;
             for (int i = 1; i <= N; ++i) {
                 {
-                current_statement_begin__ = 22;
+                current_statement_begin__ = 23;
                 validate_non_negative_index("temp", "4", 4);
                 Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> temp(4);
                 stan::math::initialize(temp, DUMMY_VAR__);
                 stan::math::fill(temp, DUMMY_VAR__);
 
 
-                current_statement_begin__ = 23;
+                current_statement_begin__ = 24;
                 stan::model::assign(temp, 
                             stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
                             ((stan::math::log(get_base1(pi_array, 1, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), 1, 1)) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), 1, 1)), 
                             "assigning variable temp");
-                current_statement_begin__ = 24;
+                current_statement_begin__ = 25;
                 stan::model::assign(temp, 
                             stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
                             ((stan::math::log(get_base1(pi_array, 2, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), 1, 1)), 
                             "assigning variable temp");
-                current_statement_begin__ = 25;
+                current_statement_begin__ = 26;
                 stan::model::assign(temp, 
                             stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()), 
                             ((stan::math::log(get_base1(pi_array, 3, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), 1, 1)) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
                             "assigning variable temp");
-                current_statement_begin__ = 26;
+                current_statement_begin__ = 27;
                 stan::model::assign(temp, 
                             stan::model::cons_list(stan::model::index_uni(4), stan::model::nil_index_list()), 
                             ((stan::math::log(get_base1(pi_array, 4, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
                             "assigning variable temp");
-                current_statement_begin__ = 27;
-                lp_accum__.add(log_sum_exp(temp));
+                current_statement_begin__ = 28;
+                stan::model::assign(summands, 
+                            stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
+                            log_sum_exp(temp), 
+                            "assigning variable summands");
                 }
+            }
+            current_statement_begin__ = 30;
+            lp_accum__.add(sum(summands));
             }
 
         } catch (const std::exception& e) {

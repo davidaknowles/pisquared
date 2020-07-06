@@ -16,6 +16,7 @@ transformed parameters {
     beta[i] = beta_fixed ? 1.0 : (beta_minus_one[i] + 1.0);
 }
 model {
+  vector[N] summands;
   alpha ~ beta(alpha_prior[1], alpha_prior[2]);
   if (beta_prior[2] > 0) beta_minus_one ~ gamma(beta_prior[1], beta_prior[2]);
   for(i in 1:N) {
@@ -24,6 +25,7 @@ model {
     temp[2] = log(pi_array[2]) + beta_lpdf(pvalues[1][i] | alpha[1], beta[1]) +  beta_lpdf(pvalues[2][i] | 1,1);
     temp[3] = log(pi_array[3]) + beta_lpdf(pvalues[1][i] | 1, 1) +  beta_lpdf(pvalues[2][i] | alpha[2], beta[2]);
     temp[4] = log(pi_array[4]) + beta_lpdf(pvalues[1][i] | alpha[1], beta[1]) +  beta_lpdf(pvalues[2][i] | alpha[2], beta[2]);
-    target += log_sum_exp(temp);
+    summands[i] = log_sum_exp(temp);
   }
+  target += sum(summands);
 }
