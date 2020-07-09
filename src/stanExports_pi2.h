@@ -38,7 +38,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_pi2");
-    reader.add_event(33, 31, "end", "model_pi2");
+    reader.add_event(34, 32, "end", "model_pi2");
     return reader;
 }
 
@@ -308,10 +308,17 @@ public:
             stan::math::initialize(beta, DUMMY_VAR__);
             stan::math::fill(beta, DUMMY_VAR__);
 
-            // transformed parameters block statements
             current_statement_begin__ = 15;
+            validate_non_negative_index("log_pi_array", "4", 4);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> log_pi_array(4);
+            stan::math::initialize(log_pi_array, DUMMY_VAR__);
+            stan::math::fill(log_pi_array, DUMMY_VAR__);
+            stan::math::assign(log_pi_array,stan::math::log(pi_array));
+
+            // transformed parameters block statements
+            current_statement_begin__ = 16;
             for (int i = 1; i <= 2; ++i) {
-                current_statement_begin__ = 16;
+                current_statement_begin__ = 17;
                 stan::model::assign(beta, 
                             stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
                             (beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, i, "beta_minus_one", 1) + 1.0)) ), 
@@ -331,15 +338,17 @@ public:
                     stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable beta: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
+            current_statement_begin__ = 15;
+            size_t log_pi_array_j_1_max__ = 4;
+            for (size_t j_1__ = 0; j_1__ < log_pi_array_j_1_max__; ++j_1__) {
+                if (stan::math::is_uninitialized(log_pi_array(j_1__))) {
+                    std::stringstream msg__;
+                    msg__ << "Undefined transformed parameter: log_pi_array" << "(" << j_1__ << ")";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable log_pi_array: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                }
+            }
 
             // model body
-            {
-            current_statement_begin__ = 19;
-            validate_non_negative_index("summands", "N", N);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> summands(N);
-            stan::math::initialize(summands, DUMMY_VAR__);
-            stan::math::fill(summands, DUMMY_VAR__);
-
 
             current_statement_begin__ = 20;
             lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
@@ -352,41 +361,49 @@ public:
             for (int i = 1; i <= N; ++i) {
                 {
                 current_statement_begin__ = 23;
-                validate_non_negative_index("temp", "4", 4);
-                Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> temp(4);
-                stan::math::initialize(temp, DUMMY_VAR__);
-                stan::math::fill(temp, DUMMY_VAR__);
-
+                validate_non_negative_index("likelihoods", "4", 4);
+                Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> likelihoods(4);
+                stan::math::initialize(likelihoods, DUMMY_VAR__);
+                stan::math::fill(likelihoods, DUMMY_VAR__);
 
                 current_statement_begin__ = 24;
-                stan::model::assign(temp, 
-                            stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
-                            ((stan::math::log(get_base1(pi_array, 1, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), 1, 1)) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), 1, 1)), 
-                            "assigning variable temp");
+                local_scalar_t__ like_1(DUMMY_VAR__);
+                (void) like_1;  // dummy to suppress unused var warning
+                stan::math::initialize(like_1, DUMMY_VAR__);
+                stan::math::fill(like_1, DUMMY_VAR__);
+                stan::math::assign(like_1,beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1)));
+
                 current_statement_begin__ = 25;
-                stan::model::assign(temp, 
-                            stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
-                            ((stan::math::log(get_base1(pi_array, 2, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), 1, 1)), 
-                            "assigning variable temp");
+                local_scalar_t__ like_2(DUMMY_VAR__);
+                (void) like_2;  // dummy to suppress unused var warning
+                stan::math::initialize(like_2, DUMMY_VAR__);
+                stan::math::fill(like_2, DUMMY_VAR__);
+                stan::math::assign(like_2,beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1)));
+
+
                 current_statement_begin__ = 26;
-                stan::model::assign(temp, 
-                            stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()), 
-                            ((stan::math::log(get_base1(pi_array, 3, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), 1, 1)) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
-                            "assigning variable temp");
+                stan::model::assign(likelihoods, 
+                            stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list()), 
+                            0, 
+                            "assigning variable likelihoods");
                 current_statement_begin__ = 27;
-                stan::model::assign(temp, 
-                            stan::model::cons_list(stan::model::index_uni(4), stan::model::nil_index_list()), 
-                            ((stan::math::log(get_base1(pi_array, 4, "pi_array", 1)) + beta_log(get_base1(get_base1(pvalues, 1, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 1, "alpha", 1), get_base1(beta, 1, "beta", 1))) + beta_log(get_base1(get_base1(pvalues, 2, "pvalues", 1), i, "pvalues", 2), get_base1(alpha, 2, "alpha", 1), get_base1(beta, 2, "beta", 1))), 
-                            "assigning variable temp");
+                stan::model::assign(likelihoods, 
+                            stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list()), 
+                            like_1, 
+                            "assigning variable likelihoods");
                 current_statement_begin__ = 28;
-                stan::model::assign(summands, 
-                            stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
-                            log_sum_exp(temp), 
-                            "assigning variable summands");
+                stan::model::assign(likelihoods, 
+                            stan::model::cons_list(stan::model::index_uni(3), stan::model::nil_index_list()), 
+                            like_2, 
+                            "assigning variable likelihoods");
+                current_statement_begin__ = 29;
+                stan::model::assign(likelihoods, 
+                            stan::model::cons_list(stan::model::index_uni(4), stan::model::nil_index_list()), 
+                            (like_1 + like_2), 
+                            "assigning variable likelihoods");
+                current_statement_begin__ = 30;
+                lp_accum__.add(log_sum_exp(add(likelihoods, log_pi_array)));
                 }
-            }
-            current_statement_begin__ = 30;
-            lp_accum__.add(sum(summands));
             }
 
         } catch (const std::exception& e) {
@@ -418,6 +435,7 @@ public:
         names__.push_back("alpha");
         names__.push_back("beta_minus_one");
         names__.push_back("beta");
+        names__.push_back("log_pi_array");
     }
 
 
@@ -435,6 +453,9 @@ public:
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(2);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(4);
         dimss__.push_back(dims__);
     }
 
@@ -499,10 +520,17 @@ public:
             stan::math::initialize(beta, DUMMY_VAR__);
             stan::math::fill(beta, DUMMY_VAR__);
 
-            // do transformed parameters statements
             current_statement_begin__ = 15;
+            validate_non_negative_index("log_pi_array", "4", 4);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> log_pi_array(4);
+            stan::math::initialize(log_pi_array, DUMMY_VAR__);
+            stan::math::fill(log_pi_array, DUMMY_VAR__);
+            stan::math::assign(log_pi_array,stan::math::log(pi_array));
+
+            // do transformed parameters statements
+            current_statement_begin__ = 16;
             for (int i = 1; i <= 2; ++i) {
-                current_statement_begin__ = 16;
+                current_statement_begin__ = 17;
                 stan::model::assign(beta, 
                             stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
                             (beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, i, "beta_minus_one", 1) + 1.0)) ), 
@@ -519,6 +547,10 @@ public:
                 size_t beta_k_0_max__ = 2;
                 for (size_t k_0__ = 0; k_0__ < beta_k_0_max__; ++k_0__) {
                     vars__.push_back(beta[k_0__]);
+                }
+                size_t log_pi_array_j_1_max__ = 4;
+                for (size_t j_1__ = 0; j_1__ < log_pi_array_j_1_max__; ++j_1__) {
+                    vars__.push_back(log_pi_array(j_1__));
                 }
             }
             if (!include_gqs__) return;
@@ -584,6 +616,12 @@ public:
                 param_name_stream__ << "beta" << '.' << k_0__ + 1;
                 param_names__.push_back(param_name_stream__.str());
             }
+            size_t log_pi_array_j_1_max__ = 4;
+            for (size_t j_1__ = 0; j_1__ < log_pi_array_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "log_pi_array" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
         }
 
         if (!include_gqs__) return;
@@ -620,6 +658,12 @@ public:
             for (size_t k_0__ = 0; k_0__ < beta_k_0_max__; ++k_0__) {
                 param_name_stream__.str(std::string());
                 param_name_stream__ << "beta" << '.' << k_0__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
+            size_t log_pi_array_j_1_max__ = 4;
+            for (size_t j_1__ = 0; j_1__ < log_pi_array_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "log_pi_array" << '.' << j_1__ + 1;
                 param_names__.push_back(param_name_stream__.str());
             }
         }

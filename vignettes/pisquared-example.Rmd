@@ -41,7 +41,7 @@ plot(function(p) dbeta(p, true_alpha, true_beta), ylim = c(0,5), xlab = "pvalue"
 We use pisquared's built-in function to simulate p-values with specified non-null rates and sharing. Here we set a low level of sharing. Note that some combinations of `pi_1`, `pi_2` and `true_jaccard` are not feasible, in which case you'll get a warning and `NULL` will be returned. 
 ```{r simulate-low-sharing, fig.width=5, fig.height=4}
 set.seed(12345)
-dat = simulate_joint_pvalues(N = 10000000, # typical num hypothesis tests in genomics
+dat = simulate_joint_pvalues(N = 1e4, # typical num hypothesis tests in genomics
                             pi_1 = 0.1, # marginal pi1 (proportion non-null) for set 1
                             pi_2 = 0.1, # marginal pi1 (proportion non-null) for set 2
                             true_jaccard = 0.1, # true sharing level

@@ -13,22 +13,23 @@ parameters {
 }
 transformed parameters {
   real beta[2];
+  vector[4] log_pi_array = log(pi_array);
   for (i in 1:2)
     beta[i] = beta_fixed ? 1.0 : (beta_minus_one[i] + 1.0);
 }
 model {
-  matrix[N,N] summands;
   alpha ~ beta(alpha_prior[1], alpha_prior[2]);
   if (beta_prior[2] > 0) beta_minus_one ~ gamma(beta_prior[1], beta_prior[2]);
   for(i in 1:N) {
     for(j in 1:N) {
-      vector[4] temp;
-      temp[1] = log(pi_array[1]) + beta_lpdf(pvalues[i] | 1, 1) +  beta_lpdf(pvalues[j] | 1, 1);
-      temp[2] = log(pi_array[2]) + beta_lpdf(pvalues[i] | alpha[1], beta[1]) +  beta_lpdf(pvalues[j] | 1,1);
-      temp[3] = log(pi_array[3]) + beta_lpdf(pvalues[i] | 1, 1) +  beta_lpdf(pvalues[j] | alpha[2], beta[2]);
-      temp[4] = log(pi_array[4]) + beta_lpdf(pvalues[i] | alpha[1], beta[1]) +  beta_lpdf(pvalues[j] | alpha[2], beta[2]);
-      summands[i,j] = weights[i,j] * log_sum_exp(temp);
+      vector[4] likelihoods;
+      real like_1 = beta_lpdf(pvalues[i] | alpha[1], beta[1]);
+      real like_2 = beta_lpdf(pvalues[j] | alpha[2], beta[2]);
+      likelihoods[1] = 0;
+      likelihoods[2] = like_1;
+      likelihoods[3] = like_2;
+      likelihoods[4] = like_1 + like_2;
+      target += weights[i,j] * log_sum_exp(likelihoods + log_pi_array);
     }
   }
-  target += sum(summands);
 }

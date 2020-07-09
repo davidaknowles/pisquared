@@ -301,6 +301,20 @@ public:
             stan::math::fill(beta, DUMMY_VAR__);
             stan::math::assign(beta,(beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, 1, "beta_minus_one", 1) + 1.0)) ));
 
+            current_statement_begin__ = 16;
+            local_scalar_t__ log_pi0;
+            (void) log_pi0;  // dummy to suppress unused var warning
+            stan::math::initialize(log_pi0, DUMMY_VAR__);
+            stan::math::fill(log_pi0, DUMMY_VAR__);
+            stan::math::assign(log_pi0,stan::math::log(pi0));
+
+            current_statement_begin__ = 17;
+            local_scalar_t__ log1m_pi0;
+            (void) log1m_pi0;  // dummy to suppress unused var warning
+            stan::math::initialize(log1m_pi0, DUMMY_VAR__);
+            stan::math::fill(log1m_pi0, DUMMY_VAR__);
+            stan::math::assign(log1m_pi0,log1m(pi0));
+
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
@@ -311,34 +325,33 @@ public:
                 msg__ << "Undefined transformed parameter: beta";
                 stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable beta: ") + msg__.str()), current_statement_begin__, prog_reader__());
             }
+            current_statement_begin__ = 16;
+            if (stan::math::is_uninitialized(log_pi0)) {
+                std::stringstream msg__;
+                msg__ << "Undefined transformed parameter: log_pi0";
+                stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable log_pi0: ") + msg__.str()), current_statement_begin__, prog_reader__());
+            }
+            current_statement_begin__ = 17;
+            if (stan::math::is_uninitialized(log1m_pi0)) {
+                std::stringstream msg__;
+                msg__ << "Undefined transformed parameter: log1m_pi0";
+                stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable log1m_pi0: ") + msg__.str()), current_statement_begin__, prog_reader__());
+            }
 
             // model body
-            {
-            current_statement_begin__ = 18;
-            validate_non_negative_index("summands", "N", N);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> summands(N);
-            stan::math::initialize(summands, DUMMY_VAR__);
-            stan::math::fill(summands, DUMMY_VAR__);
 
-
-            current_statement_begin__ = 19;
-            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
             current_statement_begin__ = 20;
+            lp_accum__.add(beta_log<propto__>(alpha, get_base1(alpha_prior, 1, "alpha_prior", 1), get_base1(alpha_prior, 2, "alpha_prior", 1)));
+            current_statement_begin__ = 21;
             if (as_bool(logical_gt(get_base1(beta_prior, 2, "beta_prior", 1), 0))) {
-                current_statement_begin__ = 20;
+                current_statement_begin__ = 21;
                 lp_accum__.add(gamma_log<propto__>(beta_minus_one, get_base1(beta_prior, 1, "beta_prior", 1), get_base1(beta_prior, 2, "beta_prior", 1)));
             }
-            current_statement_begin__ = 21;
+            current_statement_begin__ = 22;
             for (int i = 1; i <= N; ++i) {
 
-                current_statement_begin__ = 22;
-                stan::model::assign(summands, 
-                            stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
-                            (get_base1(weights, i, "weights", 1) * log_sum_exp((stan::math::log(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), 1, 1)), (log1m(pi0) + beta_log(get_base1(pvalues, i, "pvalues", 1), alpha, beta)))), 
-                            "assigning variable summands");
-            }
-            current_statement_begin__ = 24;
-            lp_accum__.add(sum(summands));
+                current_statement_begin__ = 23;
+                lp_accum__.add((get_base1(weights, i, "weights", 1) * log_sum_exp(log_pi0, (log1m_pi0 + beta_log(get_base1(pvalues, i, "pvalues", 1), alpha, beta)))));
             }
 
         } catch (const std::exception& e) {
@@ -370,6 +383,8 @@ public:
         names__.push_back("alpha");
         names__.push_back("beta_minus_one");
         names__.push_back("beta");
+        names__.push_back("log_pi0");
+        names__.push_back("log1m_pi0");
     }
 
 
@@ -382,6 +397,10 @@ public:
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back((beta_fixed ? 0 : 1 ));
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
         dimss__.push_back(dims__);
         dims__.resize(0);
         dimss__.push_back(dims__);
@@ -438,6 +457,20 @@ public:
             stan::math::fill(beta, DUMMY_VAR__);
             stan::math::assign(beta,(beta_fixed ? stan::math::promote_scalar<local_scalar_t__>(1.0) : stan::math::promote_scalar<local_scalar_t__>((get_base1(beta_minus_one, 1, "beta_minus_one", 1) + 1.0)) ));
 
+            current_statement_begin__ = 16;
+            double log_pi0;
+            (void) log_pi0;  // dummy to suppress unused var warning
+            stan::math::initialize(log_pi0, DUMMY_VAR__);
+            stan::math::fill(log_pi0, DUMMY_VAR__);
+            stan::math::assign(log_pi0,stan::math::log(pi0));
+
+            current_statement_begin__ = 17;
+            double log1m_pi0;
+            (void) log1m_pi0;  // dummy to suppress unused var warning
+            stan::math::initialize(log1m_pi0, DUMMY_VAR__);
+            stan::math::fill(log1m_pi0, DUMMY_VAR__);
+            stan::math::assign(log1m_pi0,log1m(pi0));
+
             if (!include_gqs__ && !include_tparams__) return;
             // validate transformed parameters
             const char* function__ = "validate transformed params";
@@ -446,6 +479,8 @@ public:
             // write transformed parameters
             if (include_tparams__) {
                 vars__.push_back(beta);
+                vars__.push_back(log_pi0);
+                vars__.push_back(log1m_pi0);
             }
             if (!include_gqs__) return;
         } catch (const std::exception& e) {
@@ -501,6 +536,12 @@ public:
             param_name_stream__.str(std::string());
             param_name_stream__ << "beta";
             param_names__.push_back(param_name_stream__.str());
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "log_pi0";
+            param_names__.push_back(param_name_stream__.str());
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "log1m_pi0";
+            param_names__.push_back(param_name_stream__.str());
         }
 
         if (!include_gqs__) return;
@@ -529,6 +570,12 @@ public:
         if (include_tparams__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "beta";
+            param_names__.push_back(param_name_stream__.str());
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "log_pi0";
+            param_names__.push_back(param_name_stream__.str());
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "log1m_pi0";
             param_names__.push_back(param_name_stream__.str());
         }
 
