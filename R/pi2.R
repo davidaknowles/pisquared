@@ -1,3 +1,21 @@
+#' Remove exact 0s and 1s from list of pvalues
+#'
+#' They are replaced with uniform draws between [0,eps] or [1-eps,1] respectively. eps is chosen as either the closest observed pvalue or `small_p` or `1-small_p`, whichever is closer.
+#'
+#' @param p Pvalue list
+#' @param small_p See above
+sanitize_pvalues = function(p, small_p = 1e-4) {
+  p = p[!is.na(p)] # remove NAs
+
+  min_p = pmin(min(p[p>0]), small_p)
+  p[p==0] = runif(sum(p==0)) * min_p # remove 0s
+
+  max_p = pmax(max(p[p<1]), 1-small_p)
+  p[p >= 1] = 1 - (1-max_p) * runif(sum(p >= 1)) # remove 1s
+
+  p
+}
+
 #' Copy of qvalue's pi0est default method. Included here to avoid dependency on bioconductor.
 #'
 #' Assumes pi0.method="smoother" and smooth.log.pi0 = F (see qvalue docs).
@@ -32,6 +50,7 @@ pi0est_copy = function (p,
 #' @param beta_fixed Whether to fix beta = 1.
 #' @param chains Only used if method=="sampling": sets the number of MCMC chains to run.
 #' @param refresh Only used if method=="vb": sets how frequently to output fitting info to stdout.
+#' @param small_p Passed on to sanitize_pvalues
 #' @param ... passed to rstan fitting function choosen by `method`
 #' @import rstan
 #' @return Fitted alpha and beta.
@@ -45,7 +64,9 @@ fit_truncated_beta = function(p,
                               beta_fixed = F,
                               chains = 1,
                               refresh = 0,
+                              small_p = 1e-4,
                               ...) {
+  p = sanitize_pvalues(p, small_p = small_p)
   q = p.adjust(p, method = "BH")
   p_sig = p[q < fdr]
   if (length(p_sig) < minimum_sig) {
@@ -102,6 +123,7 @@ fit_truncated_beta = function(p,
 #' @param draws Only used if method=="optimizing": draw this many samples using Laplace's method (uses the Hessian of the loglikelihood at the optimum). These are used to get approximate standard errors on each parameter.
 #' @param chains Only used if method=="sampling": sets the number of MCMC chains to run.
 #' @param refresh Only used if method=="vb": sets how frequently to output fitting info to stdout.
+#' @param small_p Passed on to sanitize_pvalues
 #' @param ... passed to rstan fitting function choosen by `method`
 #' @import rstan
 #' @return Fitted model parameters. .
@@ -119,7 +141,9 @@ model_based_pi0=function(p,
                          draws = 1000,
                          chains = 1,
                          refresh = 0,
+                         small_p = 1e-4,
                          ...) {
+  p = sanitize_pvalues(p, small_p = small_p)
   init = list()
   if (truncated_beta_init) {
     tb_fit = fit_truncated_beta(p,
@@ -203,6 +227,7 @@ model_based_pi0=function(p,
 #' @param draws Only used if method=="optimizing": draw this many samples using Laplace's method (uses the Hessian of the loglikelihood at the optimum). These are used to get approximate standard errors on each parameter.
 #' @param chains Only used if method=="sampling": sets the number of MCMC chains to run.
 #' @param refresh Only used if method=="vb": sets how frequently to output fitting info to stdout.
+#' @param small_p Passed on to sanitize_pvalues
 #' @param ... passed to rstan fitting function choosen by `method`
 #' @importFrom foreach "%do%" "%dopar%"
 #' @import rstan
@@ -220,7 +245,19 @@ pi2_estimator=function(p1,
                        draws = 1000,
                        chains = 1,
                        refresh = 0,
+                       small_p = 1e-4,
                        ...) {
+
+  if (any(is.na(p1)) | any(is.na(p2))) {
+    warning("Removing NAs from pvalues")
+    valid = !is.na(p1) & !is.na(p2)
+    p1 = p1[valid]
+    p2 = p2[valid]
+  }
+
+  p1 = sanitize_pvalues(p1, small_p = small_p)
+  p2 = sanitize_pvalues(p2, small_p = small_p)
+
   pvalues = list(p1, p2)
 
   init = foreach(pv=pvalues) %do% {
